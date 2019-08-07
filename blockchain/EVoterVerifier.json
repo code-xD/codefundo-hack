@@ -1,0 +1,300 @@
+{
+  "ApplicationName": "EVoterVerifier",
+  "DisplayName": "E-Voter Verifier",
+  "Description": "A verifier for E-voter application.",
+  "ApplicationRoles": [
+    {
+      "Name": "DataSender",
+      "Description": "Sends the data."
+    },
+    {
+      "Name": "Verifier",
+      "Description": "Requests the contract to verify."
+    }
+  ],
+  "Workflows": [
+    {
+      "Name": "EVoterVerifier",
+      "DisplayName": "Verifier",
+      "Description": "Contains the data sent.",
+      "Initiators": [ "DataSender" ],
+      "StartState":  "L1Verified",
+      "Properties": [
+          {
+            "Name": "State",
+            "DisplayName": "State",
+            "Description": "Holds the state of the current scope",
+            "Type": {
+              "Name": "state"
+            }
+          },
+          {
+            "Name": "voter_name",
+            "Description": "Voter Name",
+            "DisplayName": "Voter Name",
+            "Type":{
+            "Name": "string"
+            }
+          },
+          {
+            "Name": "aadhar_no",
+            "Description": "Aadhar No",
+            "DisplayName": "Aadhar No",
+            "Type": {
+              "Name": "int"
+            }
+          },
+          {
+            "Name": "age",
+            "Description": "Age",
+            "DisplayName": "Age",
+            "Type": {
+              "Name": "int"
+            }
+          },
+          {
+            "Name": "s_code",
+            "Description": "State Code",
+            "DisplayName": "State Code",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "c_code",
+            "Description": "City Code",
+            "DisplayName": "City Code",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "d_code",
+            "Description": "District Code",
+            "DisplayName": "District Code",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "Pin",
+            "Description": "Pin Number",
+            "DisplayName": "Pin No",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "adl_1",
+            "Description": "Add Line 1",
+            "DisplayName": "Add Line 1",
+            "Type":{
+              "Name":"string"
+            }
+          },
+          {
+            "Name": "adl_2",
+            "Description": "Add Line 2",
+            "DisplayName": "Add Line 2",
+            "Type":{
+              "Name":"string"
+             }
+          },
+          {
+            "Name": "voter_name_template",
+            "Description": "Voter Name",
+            "DisplayName": "Voter Name Template",
+            "Type":{
+            "Name": "string"
+            }
+          },
+          {
+            "Name": "aadhar_no_template",
+            "Description": "Aadhar No",
+            "DisplayName": "Aadhar No Template",
+            "Type": {
+              "Name": "int"
+            }
+          },
+          {
+            "Name": "age_template",
+            "Description": "Age",
+            "DisplayName": "Age Template",
+            "Type": {
+              "Name": "int"
+            }
+          },
+          {
+            "Name": "s_code_template",
+            "Description": "State Code",
+            "DisplayName": "State Code Template",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "c_code_template",
+            "Description": "City Code",
+            "DisplayName": "City Code Template",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "d_code_template",
+            "Description": "District Code",
+            "DisplayName": "District Code Template",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "Pin_template",
+            "Description": "Pin Number",
+            "DisplayName": "Pin No Template",
+            "Type":{
+              "Name":"int"
+            }
+          },
+          {
+            "Name": "adl_1_template",
+            "Description": "Add Line 1",
+            "DisplayName": "Add Line 1 Template",
+            "Type":{
+              "Name":"string"
+            }
+          },
+          {
+            "Name": "adl_2_template",
+            "Description": "Add Line 2",
+            "DisplayName": "Add Line 2 Template",
+            "Type":{
+              "Name":"string"
+             }
+          }
+      ],
+      "Constructor": {
+        "Parameters": [
+          {
+            "Name": "v_name",
+            "Description": "Voter Name",
+            "DisplayName": "Voter Name",
+            "Type":{
+              "Name": "string"
+            }
+          },
+          {
+            "Name": "v_name_t",
+            "Description": "Voter Name",
+            "DisplayName": "Voter Name Template",
+            "Type":{
+              "Name": "string"
+            }
+          },
+          {
+            "Name": "long_no",
+            "Description": "SCD codes,Age",
+            "DisplayName": "Uint8 numbers",
+            "Type": {
+              "Name": "array",
+                "ElementType":{
+                  "Name":"int"
+                }
+            }
+          },
+          {
+            "Name": "main_data",
+            "Description": "Aadhar No and Pin",
+            "DisplayName": "Uint64 numbers",
+            "Type": {
+              "Name": "array",
+                "ElementType":{
+                  "Name":"int"
+                }
+            }
+          },
+          {
+            "Name": "add1",
+            "Description": "Add Line 1",
+            "DisplayName": "Add Line 1 ",
+            "Type":{
+              "Name":"string"
+            }
+          },
+          {
+            "Name": "add2",
+            "Description": "Add Line 2",
+            "DisplayName": "Add Line 2",
+            "Type":{
+              "Name":"string"
+             }
+          },
+          {
+            "Name": "add1_t",
+            "Description": "Add Line 1 ",
+            "DisplayName": "Add Line 1 Template",
+            "Type":{
+              "Name":"string"
+            }
+          },
+          {
+            "Name": "add2_t",
+            "Description": "Add Line 2",
+            "DisplayName": "Add Line 2 Template",
+            "Type":{
+              "Name":"string"
+             }
+          }
+        ]
+      },
+      "Functions": [
+        {
+          "Name": "VerifyCredentials",
+          "DisplayName": "VerifyCredentials",
+          "Description": "Verifies The Credentials.",
+          "Parameters": []
+        }
+      ],
+      "States": [
+        {
+          "Name": "L1Verified",
+          "DisplayName": "Level 1 Verified",
+          "PercentComplete": 30,
+          "Style": "Success",
+          "Transitions": [
+            {
+              "AllowedRoles": ["Verifier"],
+              "AllowedInstanceRoles":[],
+              "Description": "Level 2 Verified.",
+              "Function": "VerifyCredentials",
+              "NextStates": [ "L2Verified" ],
+              "DisplayName": "Level 2 Verfied."
+            },
+            {
+              "AllowedRoles": ["Verifier"],
+              "AllowedInstanceRoles":[],
+              "Description": "Level 2 Verification Failed",
+              "Function": "VerifyCredentials",
+              "NextStates": [ "VerifyFailed" ],
+              "DisplayName": "Verification Failed."
+            },
+          ]
+        },
+        {
+          "Name": "L2Verified",
+          "DisplayName": "Level 2 Verified.",
+          "PercentComplete": 100,
+          "Style": "Success",
+          "Transitions":[]
+        },
+        {
+          "Name": "VerifyFailed",
+          "DisplayName": "Verification Failed.",
+          "PercentComplete": 100,
+          "Style": "Failure",
+          "Transitions":[]
+        }
+      ]
+    }
+  ]
+}
