@@ -4,9 +4,9 @@ from pprint import pprint
 
 AUTHORITY = 'https://login.microsoftonline.com/shivansh586gmail.onmicrosoft.com'
 WORKBENCH_API_URL = 'https://hack-ucqyga-api.azurewebsites.net'
-RESOURCE = '<APP_ID>'
-CLIENT_APP_Id = '<CLIENT_APP_ID>'
-CLIENT_SECRET = '<SECRET_CLIENT>'
+RESOURCE = '2c949b1d-0722-493d-bb18-234af0ac2b70'
+CLIENT_APP_Id = '928837dc-23d8-4e6c-8098-f6c27b7dbbae'
+CLIENT_SECRET = 'aAPeRY[]fDTSZB:4R-CLq5TtHgvJ03Kl'
 
 auth_context = AuthenticationContext(AUTHORITY)
 
@@ -16,7 +16,7 @@ def ContractPOSTData(data, dataset):
         RESOURCE, CLIENT_APP_Id, CLIENT_SECRET)
     headers = {'Authorization': 'Bearer ' + token['accessToken']}
     contractData = {
-        "workflowFunctionId": 15,
+        "workflowFunctionId": 17,
         "workflowActionParameters": [
             {
                 "name": "v_name",
@@ -25,6 +25,15 @@ def ContractPOSTData(data, dataset):
             {
                 "name": "v_name_t",
                 "value": dataset['voter_name']
+
+            },
+            {
+                "name": "gnd",
+                "value": data['gender']
+            },
+            {
+                "name": "gnd_t",
+                "value": dataset['gender']
 
             },
             {
@@ -60,7 +69,7 @@ def ContractPOSTData(data, dataset):
         ]
     }
     response = requests.post(
-        WORKBENCH_API_URL + '/api/v2/contracts?workflowId=7&contractCodeId=5&connectionId=1', headers=headers, json=contractData)
+        WORKBENCH_API_URL + '/api/v2/contracts?workflowId=8&contractCodeId=6&connectionId=1', headers=headers, json=contractData)
     contractID = response.text
     length = 0
     data['contractProperties'] = []
@@ -82,7 +91,7 @@ def contractVerify(contractID):
     headers = {'Authorization': 'Bearer ' + token['accessToken']}
 
     functionData = {
-        "workflowFunctionId": 16,
+        "workflowFunctionId": 18,
         "workflowActionParameters": []
     }
 
@@ -112,6 +121,7 @@ if __name__ == '__main__':
     contestant = {
         'voter_name': "Shivansh",
         'age': 19,
+        'gender': 0,
         'aadhar_no': 123456781234,
         'pin': 400706,
         'd_code': 5,
@@ -123,6 +133,7 @@ if __name__ == '__main__':
     template = {
         'voter_name': "Shivansh",
         'age': 19,
+        'gender': 0,
         'aadhar_no': 123456781234,
         'pin': 400706,
         'd_code': 5,
