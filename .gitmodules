@@ -1,0 +1,3 @@
+[submodule "django/dataset"]
+	path = django/dataset
+	url = https://git.heroku.com/dataset-codefundo.git

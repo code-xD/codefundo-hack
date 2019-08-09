@@ -1,4 +1,5 @@
 from random import randint
+import json
 
 
 def genper():
@@ -22,5 +23,8 @@ def genper():
                         randpersonDict['gender'] = 2
                     randpersonDict['aadhar_no'] = int(
                         ''.join([str(randint(1, 9)) for i in range(12)]))
-                    randperlist.append(randpersonDict)
+                    randperlist.append(json.dumps(randpersonDict))
     return randperlist
+
+
+print(genper()[0])

@@ -1,7 +1,5 @@
 from adal import AuthenticationContext
 import requests
-from pprint import pprint
-from randperson import genper
 
 AUTHORITY = 'https://login.microsoftonline.com/shivansh586gmail.onmicrosoft.com'
 WORKBENCH_API_URL = 'https://hack-ucqyga-api.azurewebsites.net'
@@ -145,8 +143,7 @@ if __name__ == '__main__':
     }
 
     try:
-        personlist = genper()
-        contractID = ContractPOSTData(personlist[0], personlist[0])
+        contractID = ContractPOSTData(contestant, template)
         contractVerify(contractID)
         print(getContractState(contractID))
     except Exception as error:
