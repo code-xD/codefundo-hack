@@ -1,6 +1,6 @@
 pragma solidity >=0.4.25 <0.6.0;
 
-contract EVoterVerifier{
+contract EVoterIDVerifier{
 
     enum StateType{
         L1Verified,
@@ -11,6 +11,7 @@ contract EVoterVerifier{
     string public voter_name;
     uint64 public aadhar_no;
     uint8 public age;
+    uint8 public gender;
     uint8 public s_code;
     uint8 public d_code;
     uint8 public c_code;
@@ -20,6 +21,7 @@ contract EVoterVerifier{
     string public voter_name_template;
     uint64 public aadhar_no_template;
     uint8 public age_template;
+    uint8 public gender_template;
     uint8 public s_code_template;
     uint8 public d_code_template;
     uint8 public c_code_template;
@@ -28,9 +30,11 @@ contract EVoterVerifier{
     string public adl_2_template;
     StateType public State;
 
-    constructor(string memory v_name,string memory v_name_t,uint8[8] memory long_no,uint64[4] memory main_data,
+    constructor(string memory v_name,string memory v_name_t,uint8 gnd,uint8 gnd_t,uint8[8] memory long_no,uint64[4] memory main_data,
       string memory add1,string memory add2,string memory add1_t,string memory add2_t) public{
         voter_name=v_name;
+        gender=gnd;
+        gender_template=gnd_t;
         age=long_no[0];
         s_code=long_no[1];
         c_code=long_no[2];
@@ -55,6 +59,7 @@ contract EVoterVerifier{
     {
         if (
             aadhar_no == aadhar_no_template &&
+            gender==gender_template &&
             s_code==s_code_template &&
             c_code==c_code_template &&
             d_code==d_code_template &&

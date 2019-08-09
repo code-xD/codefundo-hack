@@ -1,6 +1,6 @@
 {
-  "ApplicationName": "EVoterVerifier",
-  "DisplayName": "E-Voter Verifier",
+  "ApplicationName": "EVoterIDVerifier",
+  "DisplayName": "E-Voter ID Verifier",
   "Description": "A verifier for E-voter application.",
   "ApplicationRoles": [
     {
@@ -14,7 +14,7 @@
   ],
   "Workflows": [
     {
-      "Name": "EVoterVerifier",
+      "Name": "EVoterIDVerifier",
       "DisplayName": "Verifier",
       "Description": "Contains the data sent.",
       "Initiators": [ "DataSender" ],
@@ -42,6 +42,14 @@
             "DisplayName": "Aadhar No",
             "Type": {
               "Name": "int"
+            }
+          },
+          {
+            "Name": "gender",
+            "Description": "Gender",
+            "DisplayName": "Gender",
+            "Type":{
+            "Name": "int"
             }
           },
           {
@@ -125,6 +133,14 @@
             }
           },
           {
+            "Name": "gender_template",
+            "Description": "Gender",
+            "DisplayName": "Gender Template",
+            "Type":{
+            "Name": "int"
+            }
+          },
+          {
             "Name": "s_code_template",
             "Description": "State Code",
             "DisplayName": "State Code Template",
@@ -189,6 +205,22 @@
             "DisplayName": "Voter Name Template",
             "Type":{
               "Name": "string"
+            }
+          },
+          {
+            "Name": "gnd",
+            "Description": "Gender",
+            "DisplayName": "Gender",
+            "Type":{
+            "Name": "int"
+            }
+          },
+          {
+            "Name": "gnd_t",
+            "Description": "Gender",
+            "DisplayName": "Gender Template",
+            "Type":{
+            "Name": "int"
             }
           },
           {
