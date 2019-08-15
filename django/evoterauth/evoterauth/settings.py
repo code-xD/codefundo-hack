@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'evoterform'
+    'evoterform',
+    'userauth',
+    'regapi'
 ]
 
 MIDDLEWARE = [
@@ -107,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -115,7 +117,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-
+SITE_URL = 'http://localhost:8000'
+SENDGRID_API_KEY = "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"
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

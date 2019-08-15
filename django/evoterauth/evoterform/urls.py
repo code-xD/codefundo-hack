@@ -1,5 +1,7 @@
-from django.urls import path, include
-from .views import EVoterFormView
+from django.urls import path
+from .views import EVoterFormView, VerificationView
+
 urlpatterns = [
-    path('', EVoterFormView),
+    path('', EVoterFormView, name='mainform-view'),
+    path('<slug:connectionhash>/verify', VerificationView, name='verify-view')
 ]
