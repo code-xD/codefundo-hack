@@ -10,7 +10,6 @@ from .encryption import gen2key, decrypt
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
 
 
 def loginView(request):
@@ -76,11 +75,13 @@ def AdminLoginView(request):
         if user is not None:
             if user.is_active and len(WorkerProfile.objects.all().filter(user=user)) == 1:
                 login(request, user)
-                return redirect(f'profile/{user.username}')
+                return redirect('admin-profile-view')
     return render(request, 'userauth/mainlogin.html')
 
 
-@login_required
-def AdminProfileView(request, username):
-    tasks = Task.objects.all().filter(worker__user__username=username)
-    return render(request, 'userauth/adminprofile.html', {'user': request.user, 'tasks': tasks})
+def AdminProfileView(request):
+    try:
+        tasks = Task.objects.all().filter(worker__user=request.user)
+        return render(request, 'userauth/adminprofile.html', {'user': request.user, 'tasks': tasks})
+    except Exception:
+        return redirect('admin-login-view')

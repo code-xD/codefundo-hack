@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseNotFound, HttpResponse
-from evoterform.functions import genrandomstring
-from .models import API, Event, Login_Token, Allowed_user, Event_token
+from evoterform.functions import genrandomstring, genrandomint
+from .models import API, Event, Login_Token, Allowed_user, Event_token, Name_list
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -9,11 +9,13 @@ import json
 import requests
 from django.contrib import messages
 from django.core.mail import send_mail
-from django.contrib.auth import logout, authenticate
+from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.models import User
 from evoterform.models import AccountDetail
 from userauth.encryption import genspkey, decrypt, gen2key
 from userauth.models import OTP
+from .forms import CorporateForm, UserCreateForm, AuserForm, EventForm
+from django.conf import settings
 
 
 @csrf_exempt
@@ -45,14 +47,15 @@ def APIVoterLogin(request, token):
             username = request.POST['username']
             password = request.POST['password']
             user = authenticate(username=username, password=password)
-            filter_api = login_token.event.api
-            users = Allowed_user.objects.all().filter(api=filter_api)
+            event = login_token.event
+            users = Allowed_user.objects.all().filter(event=event)
             user_list = []
             for usr in users:
+                print(usr.user)
                 user_list.append(usr.user)
             if user is not None:
                 if user not in user_list:
-                    return HttpResponse('You are not registered for this corporation.')
+                    return HttpResponse('You are not registered for this event.')
                 if len(Event_token.objects.filter(event=login_token.event, user=user)) != 0:
                     return HttpResponse('You have already voted.')
                 if user.is_active:
@@ -99,6 +102,9 @@ def APIVoterOTP(request, user, token):
                     'user_token': key_list[1]
                 }
                 requests.post(event_token.event.api.callback_url, json=user_data)
+                login_tokens = Login_Token.objects.filter(expiry_date__lte=timezone.now())
+                for login_token in login_tokens:
+                    login_token.delete()
                 return redirect(event_token.event.api.redirect_url)
             else:
                 messages.error(request, 'The OTP did not match.')
@@ -128,3 +134,100 @@ def VerifyTokenView(request):
             return JsonResponse({'verified': False})
     except Exception:
         return HttpResponseNotFound()
+
+
+def CorporateLogin(request):
+    logout(request)
+    username = password = ''
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        print(user)
+        if user is not None:
+            if user.is_active and len(API.objects.all().filter(user=user)) == 1:
+                login(request, user)
+                return redirect('api-profile-view')
+    return render(request, 'regapi/mainlogin.html')
+
+
+def ProfileView(request):
+    try:
+        profile = API.objects.get(user=request.user)
+        events = Event.objects.filter(api=profile)
+        return render(request, 'regapi/apiprofile.html', {'user': request.user, 'events': events, 'profile': profile})
+    except Exception:
+        return redirect('corporate-login-view')
+
+
+def CorporateCreateView(request):
+    if request.method == 'POST':
+        print('post')
+        u_form = UserCreateForm(request.POST)
+        a_form = CorporateForm(request.POST)
+        if u_form.is_valid() and a_form.is_valid():
+            print('valid')
+            user = u_form.save()
+            api = a_form.save(commit=False)
+            api.api_key = genrandomint(10)
+            api.api_id = genrandomint(15)
+            api.api_secret = genrandomstring(32)
+            api.user = user
+            api.save()
+        return redirect('corporate-login-view')
+    u_form = UserCreateForm()
+    a_form = CorporateForm()
+    return render(request, 'regapi/mainform.html', {'u_form': u_form, 'a_form': a_form})
+
+
+def AddEventView(request):
+    try:
+        api = API.objects.get(user=request.user)
+        if request.method == 'POST':
+            form = EventForm(request.POST)
+            event = form.save(commit=False)
+            event.event_id = genrandomint(15)
+            event.private_key = genrandomstring(32)
+            event.api = api
+            event.save()
+            return redirect('api-profile-view')
+        form = EventForm()
+        return render(request, 'regapi/eventform.html', {'form': form})
+    except Exception:
+        return redirect('corporate-login-view')
+
+
+def AddUserView(request):
+    # try:
+    api = API.objects.get(user=request.user)
+    if request.method == 'POST':
+        form = AuserForm(api, request.POST, request.FILES)
+        ff = form.save()
+        event = ff.event
+        with open(settings.MEDIA_ROOT+'/'+str(ff.name_list), 'r') as file:
+            while file:
+                voter_id = file.readline()
+                voter_id = voter_id.strip('\n')
+                voter_id = voter_id.strip(' ')
+                voter_id = voter_id.strip('\t')
+                if voter_id == '':
+                    break
+                print('voter_id', voter_id)
+                # try:
+                ac = AccountDetail.objects.get(voterID=voter_id)
+                au = Allowed_user.objects.filter(
+                    event=event, user=User.objects.get(username=voter_id))
+                for u in au:
+                    print(u)
+                if len(au) == 0:
+                    au = Allowed_user(
+                        event=event, user=User.objects.get(username=voter_id))
+                    au.save()
+                # except Exception:
+                #     messages.error(request, 'File not properly configured.')
+                #     return render(request, 'regapi/eventform.html', {'form': form})
+        return redirect('api-profile-view')
+    file_field = AuserForm(api)
+    return render(request, 'regapi/eventform.html', {'form': file_field})
+    # except Exception:
+    #     return redirect('corporate-login-view')

@@ -27,7 +27,7 @@ def EVoterFormView(request):
                 contactdata.aadhar_no = voterdata['aadhar_no']
                 if not voterdata['age'] < 18:
                     templatedata = requests.get(
-                        f"http://dataset-codefundo.herokuapp.com/details/{voterdata['aadhar_no']}", auth=('testuser', 'codefundo'))
+                        f"http://codefundo-heroku.herokuapp.com/details/{voterdata['aadhar_no']}", auth=('testuser', 'codefundo'))
                     try:
                         templatedata = templatedata.json()
                         aLine1 = voterdata['aLine1']
@@ -41,7 +41,7 @@ def EVoterFormView(request):
                                 print(templatedata[key], value)
                                 raise Exception
                         status = 1
-                        # status = runblockchain(voterdata, templatedata)
+                    # status = runblockchain(voterdata, templatedata)
                     except Exception:
                         messages.error(request, 'Your entered data did not match with the dataset')
                     else:
@@ -64,7 +64,7 @@ def EVoterFormView(request):
                             cvoterdata.save()
                             return redirect('/form/')
                 else:
-                    messages.error("You are underage to make a voter ID Card")
+                    messages.error(request, "You are underage to make a voter ID Card")
             else:
                 messages.error(request, "Already filled the form")
             return redirect('/form/')
@@ -124,7 +124,7 @@ def VerificationView(request, connectionhash):
                 required_data.delete()
             task.delete()
             evoterdata.delete()
-            return HttpResponseRedirect('/form/')
+            return redirect('admin-profile-view')
         return render(request, 'evoterform/verification.html', {'voterdata': evoterdata, 'imagedata': required_data})
     except Exception:
         return HttpResponseNotFound()

@@ -38,6 +38,12 @@ def genrandomstring(length):
     return connectionHash
 
 
+def genrandomint(length):
+    connectionHash = int(''.join(str(random.randint(0, 9))
+                                 for i in range(length)))
+    return connectionHash
+
+
 def taskmailbody(connectionHash, receiever):
     SubjectBody = "A task has been Alloted."
     sender = "admin@evoter.com"

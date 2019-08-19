@@ -7,7 +7,7 @@ urlpatterns = [
     path('login', loginView, name='main-login-view'),
     path('otp/<slug:user>', OTPview, name='otp-login-view'),
     path('admin/login', AdminLoginView, name='admin-login-view'),
-    path('admin/profile/<str:username>', AdminProfileView, name='admin-profile-view')
+    path('admin/profile', AdminProfileView, name='admin-profile-view')
 ]
 
 if settings.DEBUG:

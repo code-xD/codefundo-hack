@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from PIL import Image
 # Create your models here.
 # Image size 1200x750(max)
 
@@ -7,14 +8,29 @@ from django.contrib.auth.models import User
 class AccountDetail(models.Model):
     aadhar_no = models.BigIntegerField(unique=True, primary_key=True)
     email = models.EmailField()
-    govtID_card = models.ImageField()
-    address_proof = models.ImageField()
-    voter_photo = models.ImageField()
+    govtID_card = models.ImageField(upload_to='ID/')
+    address_proof = models.ImageField(upload_to='Address_Proof/')
+    voter_photo = models.ImageField(upload_to='Passport_Photo/')
     connectionHash = models.CharField(max_length=255, null=True, blank=True)
     voterID = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return "Cache "+str(self.aadhar_no)
+
+    def save(self):
+        super().save()
+        imgg = Image.open(self.govtID_card.path)
+        imga = Image.open(self.address_proof.path)
+        imgv = Image.open(self.voter_photo.path)
+        output_size = (300, 300)
+        imgv.resize(output_size, Image.ANTIALIAS)
+        imgv.save(self.voter_photo.path)
+        output_size = (400, 244)
+        imgg.resize(output_size, Image.ANTIALIAS)
+        imgg.save(self.govtID_card.path)
+        output_size = (500, 707)
+        imga.resize(output_size, Image.ANTIALIAS)
+        imga.save(self.address_proof.path)
 
 
 class CacheVoterData(models.Model):
