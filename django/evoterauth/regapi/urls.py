@@ -14,7 +14,6 @@ urlpatterns = [
     path('corporate/create/', CorporateCreateView, name='corporate-create-view'),
     path('addevent/', AddEventView, name='add-event'),
     path('adduser/', AddUserView, name='add-user-view')
-    # path('evoter/login/<str:token>', APIVoterLogin, name='voter-login-view')
 ]
 
 if settings.DEBUG:

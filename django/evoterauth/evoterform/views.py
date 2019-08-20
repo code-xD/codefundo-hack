@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from .forms import EVoterForm, ContactForm
-# from .blockchain import runblockchain
+from .blockchain import runblockchain
 import requests
 import random
+from .searchcodes import getcodes
 from django.core.mail import send_mail
 from .models import AccountDetail, CacheVoterData
 from django.http import HttpResponseRedirect, HttpResponseNotFound
@@ -15,13 +16,20 @@ from django.contrib.auth import logout
 # Create your views here.
 
 
+def home(request):
+    logout(request)
+    return render(request, "home.html")
+
+
 def EVoterFormView(request):
     logout(request)
     if request.method == 'POST':
         v_form = EVoterForm(request.POST)
         c_form = ContactForm(request.POST, request.FILES)
+        # print(v_form)
         if v_form.is_valid() and c_form.is_valid():
             voterdata = v_form.cleaned_data
+            # print(voterdata)
             if len(AccountDetail.objects.all().filter(aadhar_no=voterdata['aadhar_no'])) == 0:
                 contactdata = c_form.save(commit=False)
                 contactdata.aadhar_no = voterdata['aadhar_no']
@@ -36,19 +44,23 @@ def EVoterFormView(request):
                         templatedata['aLine2'] = addressparser(templatedata['aLine2'])
                         voterdata['aLine1'] = addressparser(voterdata['aLine1'])
                         voterdata['aLine2'] = addressparser(voterdata['aLine2'])
+                        scd = getcodes(voterdata['s_code'],
+                                       voterdata['c_code'], voterdata['d_code'])
+                        voterdata['s_code'] = scd[0]
+                        voterdata['c_code'] = scd[1]
+                        voterdata['d_code'] = scd[2]
                         for key, value in voterdata.items():
                             if str(templatedata[key]) != str(value):
                                 print(templatedata[key], value)
                                 raise Exception
-                        status = 1
-                    # status = runblockchain(voterdata, templatedata)
+                        status = runblockchain(voterdata, templatedata)
                     except Exception:
                         messages.error(request, 'Your entered data did not match with the dataset')
+                        return redirect('/form/')
                     else:
-                        if status == 2:
-                            messages.error(
-                                request, 'Your entered data did not match with the dataset')
-                        elif status == 1:
+                        print("status", status)
+                        if status == '1':
+                            print("equal")
                             voterdata['aLine1'] = aLine1
                             voterdata['aLine2'] = aLine2
                             contactdata.connectionHash = genrandomstring(250)
@@ -60,9 +72,16 @@ def EVoterFormView(request):
                             minworker.task_count += 1
                             minworker.save()
                             contactdata.save()
+                            del voterdata['contractProperties']
                             cvoterdata = CacheVoterData(**voterdata)
                             cvoterdata.save()
+                            messages.success(
+                                request, """Your details are sent to the Admin.
+                                You will be notified in the mail""")
                             return redirect('/form/')
+                        elif status != '1':
+                            messages.error(
+                                request, 'Your entered data did not match with the dataset')
                 else:
                     messages.error(request, "You are underage to make a voter ID Card")
             else:
@@ -70,7 +89,7 @@ def EVoterFormView(request):
             return redirect('/form/')
     v_form = EVoterForm()
     c_form = ContactForm()
-    return render(request, 'evoterform/mainform.html', {'v_form': v_form, 'c_form': c_form})
+    return render(request, 'voterform.html', {'v_form': v_form, 'c_form': c_form})
 
 
 def VerificationView(request, connectionhash):

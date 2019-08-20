@@ -43,11 +43,11 @@ def APIVoterLogin(request, token):
     username = password = ''
     try:
         login_token = Login_Token.objects.get(token=token, expiry_date__gte=timezone.now())
+        event = login_token.event
         if request.POST:
             username = request.POST['username']
             password = request.POST['password']
             user = authenticate(username=username, password=password)
-            event = login_token.event
             users = Allowed_user.objects.all().filter(event=event)
             user_list = []
             for usr in users:
@@ -77,7 +77,7 @@ def APIVoterLogin(request, token):
                     send_mail('OTP has been mailed', mailbody, 'admin@evoter.com', [data.email])
                     otp.save()
                     return redirect(reverse('otp-api-view', args=(user.username, login_token.token,)))
-        return render(request, 'regapi/mainlogin.html')
+        return render(request, 'voter-login.html', {"event": event})
     except Exception:
         return HttpResponseNotFound()
 
@@ -108,7 +108,7 @@ def APIVoterOTP(request, user, token):
                 return redirect(event_token.event.api.redirect_url)
             else:
                 messages.error(request, 'The OTP did not match.')
-        return render(request, 'regapi/otplogin.html')
+        return render(request, 'voter-otp.html')
     except Exception:
         otps = OTP.objects.all().filter(account=user)
         for opt in otps:
@@ -136,26 +136,32 @@ def VerifyTokenView(request):
         return HttpResponseNotFound()
 
 
+@csrf_exempt
 def CorporateLogin(request):
     logout(request)
-    username = password = ''
-    if request.POST:
+    if request.method == 'POST':
+        print("POST")
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
         print(user)
         if user is not None:
-            if user.is_active and len(API.objects.all().filter(user=user)) == 1:
+            if user.is_active:
                 login(request, user)
                 return redirect('api-profile-view')
-    return render(request, 'regapi/mainlogin.html')
+    return render(request, 'corp login.html')
 
 
 def ProfileView(request):
     try:
         profile = API.objects.get(user=request.user)
         events = Event.objects.filter(api=profile)
-        return render(request, 'regapi/apiprofile.html', {'user': request.user, 'events': events, 'profile': profile})
+        for event in events:
+            total_votes = len(Allowed_user.objects.filter(event=event))
+            voted = len(Event_token.objects.filter(event=event))
+            event.total = total_votes
+            event.voted = voted
+        return render(request, 'corp-profile.html', {'user': request.user, 'events': events, 'profile': profile})
     except Exception:
         return redirect('corporate-login-view')
 
@@ -175,59 +181,57 @@ def CorporateCreateView(request):
             api.user = user
             api.save()
         return redirect('corporate-login-view')
-    u_form = UserCreateForm()
-    a_form = CorporateForm()
-    return render(request, 'regapi/mainform.html', {'u_form': u_form, 'a_form': a_form})
+    return render(request, 'API registration.html')
 
 
 def AddEventView(request):
-    try:
-        api = API.objects.get(user=request.user)
-        if request.method == 'POST':
-            form = EventForm(request.POST)
-            event = form.save(commit=False)
-            event.event_id = genrandomint(15)
-            event.private_key = genrandomstring(32)
-            event.api = api
-            event.save()
-            return redirect('api-profile-view')
-        form = EventForm()
-        return render(request, 'regapi/eventform.html', {'form': form})
-    except Exception:
-        return redirect('corporate-login-view')
-
-
-def AddUserView(request):
     # try:
     api = API.objects.get(user=request.user)
     if request.method == 'POST':
-        form = AuserForm(api, request.POST, request.FILES)
-        ff = form.save()
-        event = ff.event
-        with open(settings.MEDIA_ROOT+'/'+str(ff.name_list), 'r') as file:
-            while file:
-                voter_id = file.readline()
-                voter_id = voter_id.strip('\n')
-                voter_id = voter_id.strip(' ')
-                voter_id = voter_id.strip('\t')
-                if voter_id == '':
-                    break
-                print('voter_id', voter_id)
-                # try:
-                ac = AccountDetail.objects.get(voterID=voter_id)
-                au = Allowed_user.objects.filter(
-                    event=event, user=User.objects.get(username=voter_id))
-                for u in au:
-                    print(u)
-                if len(au) == 0:
-                    au = Allowed_user(
-                        event=event, user=User.objects.get(username=voter_id))
-                    au.save()
-                # except Exception:
-                #     messages.error(request, 'File not properly configured.')
-                #     return render(request, 'regapi/eventform.html', {'form': form})
+        form = EventForm(request.POST)
+        event = form.save(commit=False)
+        event.event_id = genrandomint(15)
+        event.private_key = genrandomstring(32)
+        event.api = api
+        event.save()
         return redirect('api-profile-view')
-    file_field = AuserForm(api)
-    return render(request, 'regapi/eventform.html', {'form': file_field})
+    form = EventForm()
+    return render(request, 'regapi/eventform.html', {'form': form})
     # except Exception:
     #     return redirect('corporate-login-view')
+
+
+def AddUserView(request):
+    try:
+        api = API.objects.get(user=request.user)
+        if request.method == 'POST':
+            form = AuserForm(api, request.POST, request.FILES)
+            ff = form.save()
+            event = ff.event
+            with open(settings.MEDIA_ROOT+'/'+str(ff.name_list), 'r') as file:
+                while file:
+                    voter_id = file.readline()
+                    voter_id = voter_id.strip('\n')
+                    voter_id = voter_id.strip(' ')
+                    voter_id = voter_id.strip('\t')
+                    if voter_id == '':
+                        break
+                    print('voter_id', voter_id)
+                    try:
+                        ac = AccountDetail.objects.get(voterID=voter_id)
+                        au = Allowed_user.objects.filter(
+                            event=event, user=User.objects.get(username=voter_id))
+                        for u in au:
+                            print(u)
+                        if len(au) == 0:
+                            au = Allowed_user(
+                                event=event, user=User.objects.get(username=voter_id))
+                            au.save()
+                    except Exception:
+                        messages.error(request, 'File not properly configured.')
+                        return render(request, 'regapi/eventform.html', {'form': form})
+            return redirect('api-profile-view')
+        file_field = AuserForm(api)
+        return render(request, 'regapi/eventform.html', {'form': file_field})
+    except Exception:
+        return redirect('corporate-login-view')
